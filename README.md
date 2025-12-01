@@ -112,6 +112,21 @@ SELECT COUNT(*) FROM POKEMON;
 SELECT id, name, primary_type FROM POKEMON ORDER BY id LIMIT 10;
 ```
 
+## EDA (Jupyter Notebook)
+
+- **Ubicación**: carpeta `EDA/`, notebook `RAW_EDA.ipynb`.
+- **Objetivo**: análisis exploratorio de datos RAW desde MongoDB (estadísticas simples y distribución de tipos primarios con gráfica de barras).
+- **Entorno aislado para EDA**:
+  ```bash
+  cd EDA
+  python3 -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements.txt
+  jupyter notebook RAW_EDA.ipynb
+  ```
+- **Salidas**: este notebook guarda outputs en `data/eda/` (ignorados por git).
+- **Notas**: asegúrate de tener `.env` con `MONGO_URI`, `MONGO_DB`, `MONGO_RAW_COLLECTION`.
+
 ## Notas didácticas
 
 - Código breve y fácil de leer.
