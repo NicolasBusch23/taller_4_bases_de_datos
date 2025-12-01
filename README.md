@@ -82,7 +82,7 @@ Configura `DATABASE_URL` para MySQL en `.env`. La base de datos indicada en la U
   - Proyecta y estandariza a un esquema tabular simple:
     - `id`: entero del PokeAPI.
     - `name`: convertido a MAYÚSCULAS.
-    - `height`, `weight`, `base_experience`: valores numéricos si existen, si no `NULL`.
+    - `height` en metros (dm → m), `weight` en kilogramos (hg → kg), `base_experience` numérico.
     - `types`: lista aplanada a texto separado por comas.
     - `primary_type`: primer elemento de `types` (si existe).
     - `abilities`: lista aplanada a texto separado por comas.
@@ -91,7 +91,7 @@ Configura `DATABASE_URL` para MySQL en `.env`. La base de datos indicada en la U
 
 - **LOAD**
   - Asegura que la base de datos MySQL exista (la crea si no está).
-  - Crea la tabla `POKEMON` si no existe (InnoDB, utf8mb4).
+  - Crea la tabla `POKEMON` si no existe (InnoDB, utf8mb4). Columnas `height DECIMAL(5,2)`, `weight DECIMAL(7,2)`.
   - Inserta/actualiza filas desde el CSV con `INSERT ... ON DUPLICATE KEY UPDATE` usando `id` como clave primaria.
   - Propósito: disponibilizar datos estandarizados en SQL para consultas y reporting.
 
@@ -116,7 +116,7 @@ SELECT id, name, primary_type FROM POKEMON ORDER BY id LIMIT 10;
 
 - **Ubicación**: carpeta `EDA/`, notebook `RAW_EDA.ipynb`.
 - **Objetivo**: análisis exploratorio de datos RAW desde MongoDB.
-- **Visualizaciones**: barras y torta (tipos primarios), además de histogramas de `height`, `weight`, `base_experience`.
+- **Visualizaciones**: barras y torta (tipos primarios), histogramas de `height`, `weight`, `base_experience`, y dispersión altura vs. peso con ajuste lineal.
 - **Cómo correrlo (mismo entorno del proyecto)**:
   
   ```bash

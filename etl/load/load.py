@@ -27,19 +27,6 @@ def _ensure_schema(conn) -> None:
     )
     with conn.cursor() as cur:
         cur.execute(create_sql)
-        # If the table already existed with INT columns, migrate to DECIMAL
-        cur.execute(
-            """
-            SELECT COLUMN_NAME, DATA_TYPE
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'POKEMON' AND COLUMN_NAME IN ('height','weight')
-            """
-        )
-        col_types = {row[0].lower(): row[1].lower() for row in cur.fetchall()}
-        if col_types.get('height') not in (None, 'decimal'):
-            cur.execute("ALTER TABLE `POKEMON` MODIFY COLUMN `height` DECIMAL(5,2) NULL")
-        if col_types.get('weight') not in (None, 'decimal'):
-            cur.execute("ALTER TABLE `POKEMON` MODIFY COLUMN `weight` DECIMAL(7,2) NULL")
     conn.commit()
 
 
