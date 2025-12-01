@@ -115,17 +115,21 @@ SELECT id, name, primary_type FROM POKEMON ORDER BY id LIMIT 10;
 ## EDA (Jupyter Notebook)
 
 - **Ubicación**: carpeta `EDA/`, notebook `RAW_EDA.ipynb`.
-- **Objetivo**: análisis exploratorio de datos RAW desde MongoDB (estadísticas simples y distribución de tipos primarios con gráfica de barras).
-- **Entorno aislado para EDA**:
+- **Objetivo**: análisis exploratorio de datos RAW desde MongoDB.
+- **Visualizaciones**: barras y torta (tipos primarios), además de histogramas de `height`, `weight`, `base_experience`.
+- **Cómo correrlo (mismo entorno del proyecto)**:
+  
   ```bash
-  cd EDA
-  python3 -m venv .venv
+  # en la raíz del proyecto
   source .venv/bin/activate
-  pip install -r requirements.txt
-  jupyter notebook RAW_EDA.ipynb
+  pip install -r requirements.txt 
+  jupyter notebook EDA/RAW_EDA.ipynb
   ```
-- **Salidas**: este notebook guarda outputs en `data/eda/` (ignorados por git).
+  
+- **Salida**: los gráficos se muestran inline en el notebook. Si necesitas archivos, puedes usar `plt.savefig(...)` en las celdas.
 - **Notas**: asegúrate de tener `.env` con `MONGO_URI`, `MONGO_DB`, `MONGO_RAW_COLLECTION`.
+- Comentarios y logs en inglés para buenas prácticas.
+- Cada etapa está aislada en su propia carpeta y módulo.
 
 ## Notas didácticas
 

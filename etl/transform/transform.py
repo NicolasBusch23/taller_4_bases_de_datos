@@ -14,11 +14,18 @@ def _normalize(doc: Dict) -> Dict:
     types: List[str] = [t.get("type", {}).get("name", "") for t in doc.get("types", [])]
     abilities: List[str] = [a.get("ability", {}).get("name", "") for a in doc.get("abilities", [])]
 
+    # Convert PokeAPI units to SI for analytics and SQL load
+    # height: decimeters -> meters, weight: hectograms -> kilograms
+    h_raw = doc.get("height")
+    w_raw = doc.get("weight")
+    height_m = round(h_raw / 10, 2) if isinstance(h_raw, (int, float)) else None
+    weight_kg = round(w_raw / 10, 2) if isinstance(w_raw, (int, float)) else None
+
     return {
         "id": doc.get("id"),
         "name": str(doc.get("name", "")).upper(),  # standardize to upper-case
-        "height": doc.get("height"),
-        "weight": doc.get("weight"),
+        "height": height_m,
+        "weight": weight_kg,
         "base_experience": doc.get("base_experience"),
         "primary_type": types[0] if types else None,
         "types": ",".join(filter(None, types)),

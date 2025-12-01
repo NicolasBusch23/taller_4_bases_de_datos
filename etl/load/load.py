@@ -16,8 +16,8 @@ def _ensure_schema(conn) -> None:
         CREATE TABLE IF NOT EXISTS `POKEMON` (
             `id` INT PRIMARY KEY,
             `name` VARCHAR(100) NOT NULL,
-            `height` INT NULL,
-            `weight` INT NULL,
+            `height` DECIMAL(5,2) NULL,
+            `weight` DECIMAL(7,2) NULL,
             `base_experience` INT NULL,
             `primary_type` VARCHAR(50) NULL,
             `types` TEXT NULL,
@@ -27,23 +27,44 @@ def _ensure_schema(conn) -> None:
     )
     with conn.cursor() as cur:
         cur.execute(create_sql)
+        # If the table already existed with INT columns, migrate to DECIMAL
+        cur.execute(
+            """
+            SELECT COLUMN_NAME, DATA_TYPE
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'POKEMON' AND COLUMN_NAME IN ('height','weight')
+            """
+        )
+        col_types = {row[0].lower(): row[1].lower() for row in cur.fetchall()}
+        if col_types.get('height') not in (None, 'decimal'):
+            cur.execute("ALTER TABLE `POKEMON` MODIFY COLUMN `height` DECIMAL(5,2) NULL")
+        if col_types.get('weight') not in (None, 'decimal'):
+            cur.execute("ALTER TABLE `POKEMON` MODIFY COLUMN `weight` DECIMAL(7,2) NULL")
     conn.commit()
 
 
-def _parse_row(row: dict) -> Tuple[int, str, Optional[int], Optional[int], Optional[int], Optional[str], Optional[str], Optional[str]]:
+def _parse_row(row: dict) -> Tuple[int, str, Optional[float], Optional[float], Optional[int], Optional[str], Optional[str], Optional[str]]:
     def _to_int(v):
         if v == "" or v is None:
             return None
         try:
-            return int(v)
-        except ValueError:
+            return int(float(v))
+        except (ValueError, TypeError):
+            return None
+
+    def _to_float(v):
+        if v == "" or v is None:
+            return None
+        try:
+            return float(v)
+        except (ValueError, TypeError):
             return None
 
     return (
         int(row["id"]),
         str(row["name"]),
-        _to_int(row.get("height")),
-        _to_int(row.get("weight")),
+        _to_float(row.get("height")),
+        _to_float(row.get("weight")),
         _to_int(row.get("base_experience")),
         row.get("primary_type") or None,
         row.get("types") or None,
