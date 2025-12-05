@@ -13,7 +13,7 @@ def _ensure_schema(conn) -> None:
     """Create target table if not exists in MySQL."""
     create_sql = (
         """
-        CREATE TABLE IF NOT EXISTS `POKEMON` (
+        CREATE TABLE IF NOT EXISTS `pokemones` (
             `id` INT PRIMARY KEY,
             `name` VARCHAR(100) NOT NULL,
             `height` DECIMAL(5,2) NULL,
@@ -60,7 +60,7 @@ def _parse_row(row: dict) -> Tuple[int, str, Optional[float], Optional[float], O
 
 
 def _load_csv_into_mysql(csv_path: str, conn) -> int:
-    """Load CSV rows into MySQL table POKEMON with upsert."""
+    """Load CSV rows into MySQL table pokemones with upsert."""
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         tuples: List[Tuple] = [_parse_row(r) for r in reader]
@@ -70,7 +70,7 @@ def _load_csv_into_mysql(csv_path: str, conn) -> int:
 
     insert_sql = (
         """
-        INSERT INTO `POKEMON` (id, name, height, weight, base_experience, primary_type, types, abilities)
+        INSERT INTO `pokemones` (id, name, height, weight, base_experience, primary_type, types, abilities)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             name=VALUES(name),
