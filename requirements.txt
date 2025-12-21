@@ -6,3 +6,4 @@ matplotlib==3.9.2
 notebook==7.2.2
 ipykernel==6.29.5
 pandas==2.2.3
+Path==17.1.1
