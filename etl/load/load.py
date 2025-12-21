@@ -13,15 +13,14 @@ def _ensure_schema(conn) -> None:
     """Create target table if not exists in MySQL."""
     create_sql = (
         """
-        CREATE TABLE IF NOT EXISTS `pokemones` (
+        CREATE TABLE IF NOT EXISTS `juegos` (
             `id` INT PRIMARY KEY,
-            `name` VARCHAR(100) NOT NULL,
-            `height` DECIMAL(5,2) NULL,
-            `weight` DECIMAL(7,2) NULL,
-            `base_experience` INT NULL,
-            `primary_type` VARCHAR(50) NULL,
-            `types` TEXT NULL,
-            `abilities` TEXT NULL
+            `title` VARCHAR(150) NOT NULL,
+            `genre` VARCHAR(50) NOT NULL,
+            `platform` VARCHAR(50) NOT NULL,
+            `developer` VARCHAR(100) NOT NULL,
+            `release_date` DATE NULL,
+            `short_description` TEXT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """
     )
@@ -30,37 +29,32 @@ def _ensure_schema(conn) -> None:
     conn.commit()
 
 
-def _parse_row(row: dict) -> Tuple[int, str, Optional[float], Optional[float], Optional[int], Optional[str], Optional[str], Optional[str]]:
-    def _to_int(v):
-        if v == "" or v is None:
-            return None
-        try:
-            return int(float(v))
-        except (ValueError, TypeError):
-            return None
+def _parse_row(row: dict) -> Tuple[
+    int, str, str, str, str, Optional[str], Optional[str]
+]:
+    """
+    Convert CSV row into a tuple with correct Python types
+    matching the MySQL schema.
+    """
 
-    def _to_float(v):
-        if v == "" or v is None:
+    def _to_date(v):
+        if v in ("", None):
             return None
-        try:
-            return float(v)
-        except (ValueError, TypeError):
-            return None
+        return v  # MySQL acepta YYYY-MM-DD como DATE
 
     return (
         int(row["id"]),
-        str(row["name"]),
-        _to_float(row.get("height")),
-        _to_float(row.get("weight")),
-        _to_int(row.get("base_experience")),
-        row.get("primary_type") or None,
-        row.get("types") or None,
-        row.get("abilities") or None,
+        str(row["title"]),
+        str(row["genre"]),
+        str(row["platform"]),
+        str(row["developer"]),
+        _to_date(row.get("release_date")),
+        row.get("short_description") or None,
     )
 
 
 def _load_csv_into_mysql(csv_path: str, conn) -> int:
-    """Load CSV rows into MySQL table pokemones with upsert."""
+    """Load CSV rows into MySQL table juegos with upsert."""
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         tuples: List[Tuple] = [_parse_row(r) for r in reader]
@@ -70,16 +64,16 @@ def _load_csv_into_mysql(csv_path: str, conn) -> int:
 
     insert_sql = (
         """
-        INSERT INTO `pokemones` (id, name, height, weight, base_experience, primary_type, types, abilities)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO `juegos`
+        (id, title, genre, platform, developer, release_date, short_description)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
-            name=VALUES(name),
-            height=VALUES(height),
-            weight=VALUES(weight),
-            base_experience=VALUES(base_experience),
-            primary_type=VALUES(primary_type),
-            types=VALUES(types),
-            abilities=VALUES(abilities)
+            title=VALUES(title),
+            genre=VALUES(genre),
+            platform=VALUES(platform),
+            developer=VALUES(developer),
+            release_date=VALUES(release_date),
+            short_description=VALUES(short_description)
         """
     )
     with conn.cursor() as cur:
@@ -91,13 +85,13 @@ def _load_csv_into_mysql(csv_path: str, conn) -> int:
 def load_main() -> None:
     """LOAD: Read transformed CSV and load into MySQL database."""
     cfg = load_config()
-    csv_path = "data/transformed/pokemon.csv"
+    csv_path = "data/transformed/juegos.csv"
 
     conn = get_mysql_connection(cfg)
     try:
         _ensure_schema(conn)
         log.info("Starting LOAD: loading CSV into MySQL")
         count = _load_csv_into_mysql(csv_path, conn)
-        log.info("LOAD done. Upserted %d records into table POKEMON.", count)
+        log.info("LOAD done. Upserted %d records into table JUEGOS.", count)
     finally:
         conn.close()
