@@ -1,4 +1,4 @@
-# ETL: FreeToGame API → MongoDB (RAW) → MySQL (SQL)
+# ETL: FreeToGame API → MongoDB (RAW) → MySQL (SQL) y EDA
 
 Proyecto académico propuesto por la materia Bases de Datos que implementa un proceso ETL (Extract, Transform, Load) a partir de datos obtenidos desde una API pública de videojuegos gratuitos, con almacenamiento intermedio en MongoDB y carga final en una base de datos relacional MySQL.
 
@@ -125,7 +125,7 @@ SELECT COUNT(*) FROM JUEGOS;
 ## EDA (Jupyter Notebook)
 
 - **Ubicación**: carpeta `EDA/`, notebook `analisis.ipynb`.
-- **Objetivo**: Realizar un análisis exploratorio de los datos transformados entregados en el archivo .csv
+- **Objetivo**: Realizar un análisis exploratorio de los datos transformados entregados en el archivo CSV
 - **Visualizaciones**: Gráfico de Torta, Barras y de Tendencia.
 - **Cómo correrlo (mismo entorno del proyecto)**:
   
