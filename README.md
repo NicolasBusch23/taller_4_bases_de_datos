@@ -130,7 +130,7 @@ SELECT COUNT(*) FROM JUEGOS;
   # en la raíz del proyecto
   source .venv/bin/activate
   pip install -r requirements.txt 
-  jupyter notebook analisis.ipynb
+  jupyter notebook EDA/analisis.ipynb
   ```
   
 - **Salida**: los gráficos se muestran inline en el notebook. Si necesitas archivos, puedes usar `plt.savefig(...)` en las celdas.
