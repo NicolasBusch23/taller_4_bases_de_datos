@@ -98,7 +98,7 @@ Configura `DATABASE_URL` para MySQL en `.env`. La base de datos indicada en la U
       developer
       release_date
       short_description
-  - Objetivo: Generar un archivo CSV con 190 registros en data/transformed/juegos.csv. siguiendo las especificaciones anteriorez
+  - Objetivo: Generar un archivo CSV con 190 registros en data/transformed/juegos.csv. siguiendo las especificaciones anteriores
 
 - **LOAD**
   - Crea la tabla juegos en MySQL si no existe.
