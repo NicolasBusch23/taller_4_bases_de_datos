@@ -1,6 +1,8 @@
-# ETL: PokeAPI → MongoDB (RAW) → MySQL (SQL)
+# ETL: FreeToGame API → MongoDB (RAW) → MySQL (SQL)
 
 Proyecto académico propuesto por la materia Bases de Datos que implementa un proceso ETL (Extract, Transform, Load) a partir de datos obtenidos desde una API pública de videojuegos gratuitos, con almacenamiento intermedio en MongoDB y carga final en una base de datos relacional MySQL.
+
+Se tomó como guía el repositorio https://github.com/mframosg/Python---III compartido por el profesor de la asignatura
 
 ## Estructura del proyecto
 
