@@ -1,12 +1,22 @@
 # ETL: PokeAPI → MongoDB (RAW) → MySQL (SQL)
 
-Proyecto educativo con ETL claramente separado en tres etapas:
-
-- **EXTRACT**: consume PokeAPI y guarda JSON crudo (raw) en MongoDB.
-- **TRANSFORM**: lee el raw desde MongoDB, estandariza campos y genera un CSV "transformado".
-- **LOAD**: carga el CSV transformado en una base de datos MySQL (SQL).
+Proyecto académico propuesto por la materia Bases de Datos que implementa un proceso ETL (Extract, Transform, Load) a partir de datos obtenidos desde una API pública de videojuegos gratuitos, con almacenamiento intermedio en MongoDB y carga final en una base de datos relacional MySQL.
 
 ## Estructura del proyecto
+
+El proyecto sigue una arquitectura ETL claramente separada en tres etapas:
+
+- EXTRACT: consumo de la API FreeToGame y almacenamiento de los datos crudos (RAW) en MongoDB.
+- TRANSFORM: limpieza, selección y estandarización de variables relevantes, con generación de un archivo CSV.
+- LOAD: carga de los datos transformados en una base de datos MySQL para análisis estructurado.
+
+## API Utilizada
+
+- Nombre: FreeToGame API
+- URL base: https://www.freetogame.com/api/games
+- Descripción: API pública que provee información sobre videojuegos gratuitos, incluyendo género, plataforma, desarrollador y fecha de lanzamiento.
+- Formato de respuesta: JSON
+
 
 ```text
 etl/
@@ -37,7 +47,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Opcional: editar .env para ajustar variables
+# Se sugiere crear un archivo .env para ajustar variables. Debe seguir el formato de .env.example
 ```
 
 Asegúrate de que MongoDB está corriendo (por defecto en `mongodb://localhost:27017`).
@@ -72,58 +82,55 @@ Configura `DATABASE_URL` para MySQL en `.env`. La base de datos indicada en la U
 ## Qué hace cada etapa (en esta aplicación)
 
 - **EXTRACT**
-  - Llama a `GET /pokemon?limit=N` de PokeAPI para obtener la lista inicial.
-  - Recupera el detalle de cada Pokémon con su `url` individual.
-  - Guarda el JSON crudo (sin transformar) en MongoDB colección `pokemon_raw`, usando `id` como clave natural (upsert con `replace_one`).
-  - Propósito: persistir la fuente original tal cual, para auditoría y reprocesos.
+  - Consume la API FreeToGame.
+  - Recupera un conjunto limitado de videojuegos según configuración.
+  - Almacena los datos crudos en MongoDB sin modificaciones.
+  - Objetivo: Conservar la fuente original para trazabilidad y reprocesamiento.
 
 - **TRANSFORM**
-  - Lee documentos RAW desde MongoDB (excluyendo `_id`).
-  - Proyecta y estandariza a un esquema tabular simple:
-    - `id`: entero del PokeAPI.
-    - `name`: convertido a MAYÚSCULAS.
-    - `height` en metros (dm → m), `weight` en kilogramos (hg → kg), `base_experience` numérico.
-    - `types`: lista aplanada a texto separado por comas.
-    - `primary_type`: primer elemento de `types` (si existe).
-    - `abilities`: lista aplanada a texto separado por comas.
-  - Escribe el resultado en `data/transformed/pokemon.csv` con cabecera consistente.
-  - Propósito: generar una vista limpia y homogénea lista para cargas analíticas/relacionales.
+  - Lee los datos RAW desde MongoDB.
+  - Selecciona las variables:
+      title
+      genre
+      platform
+      developer
+      release_date
+      short_description
+  - Objetivo: Generar un archivo CSV con 190 registros en data/transformed/juegos.csv. siguiendo las especificaciones anteriorez
 
 - **LOAD**
-  - Asegura que la base de datos MySQL exista (la crea si no está).
-  - Crea la tabla `POKEMON` si no existe (InnoDB, utf8mb4). Columnas `height DECIMAL(5,2)`, `weight DECIMAL(7,2)`.
-  - Inserta/actualiza filas desde el CSV con `INSERT ... ON DUPLICATE KEY UPDATE` usando `id` como clave primaria.
-  - Propósito: disponibilizar datos estandarizados en SQL para consultas y reporting.
+  - Crea la tabla juegos en MySQL si no existe.
+  - Inserta los datos desde el CSV.
+  - Convierte la fecha de lanzamiento a tipo DATE para mayor comodidad en MySQL.
+  - Objetivo: disponibilizar los datos en un sistema relacional para consultas SQL.
 
 ## Resultados
+  - MongoDB: colección con datos crudos (RAW).
+  - CSV transformado: data/transformed/juegos.csv.
+  - MySQL: tabla juegos con datos estructurados.
 
-- RAW en MongoDB: colección `pokemon_raw` (por defecto en DB `etl_demo`).
-- Transformado en archivo: `data/transformed/pokemon.csv`.
-- SQL en MySQL: base de datos (tomada de `DATABASE_URL`), tabla `POKEMON`.
-
-Nota: Los archivos CSV generados están ignorados por `.gitignore` y no se versionan.
+Nota: Los archivos CSV generados están ignorados por `.gitignore`.
 
 ### Verificación en MySQL
 
 ```sql
 -- Desde cliente MySQL:
-USE pokemon; -- o la base definida en la URL
-SELECT COUNT(*) FROM POKEMON;
-SELECT id, name, primary_type FROM POKEMON ORDER BY id LIMIT 10;
+USE juegos_db; -- o la base definida en la URL
+SELECT COUNT(*) FROM JUEGOS;
 ```
 
 ## EDA (Jupyter Notebook)
 
-- **Ubicación**: carpeta `EDA/`, notebook `RAW_EDA.ipynb`.
-- **Objetivo**: análisis exploratorio de datos RAW desde MongoDB.
-- **Visualizaciones**: barras y torta (tipos primarios), histogramas de `height`, `weight`, `base_experience`, y dispersión altura vs. peso con ajuste lineal.
+- **Ubicación**: carpeta `EDA/`, notebook `analisis.ipynb`.
+- **Objetivo**: Realizar un análisis exploratorio de los datos transformados entregados en el archivo .csv
+- **Visualizaciones**: Gráfico de Torta, Barras y de Tendencia.
 - **Cómo correrlo (mismo entorno del proyecto)**:
   
   ```bash
   # en la raíz del proyecto
   source .venv/bin/activate
   pip install -r requirements.txt 
-  jupyter notebook EDA/RAW_EDA.ipynb
+  jupyter notebook analisis.ipynb
   ```
   
 - **Salida**: los gráficos se muestran inline en el notebook. Si necesitas archivos, puedes usar `plt.savefig(...)` en las celdas.
