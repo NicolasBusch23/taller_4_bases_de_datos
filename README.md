@@ -85,20 +85,21 @@ Configura `DATABASE_URL` para MySQL en `.env`. La base de datos indicada en la U
 
 - **EXTRACT**
   - Consume la API FreeToGame.
-  - Recupera un conjunto limitado de videojuegos según configuración.
+  - Recupera un conjunto limitado de videojuegos según configuración. En este ejercicio, se decidió extraer 190 registros.
   - Almacena los datos crudos en MongoDB sin modificaciones.
   - Objetivo: Conservar la fuente original para trazabilidad y reprocesamiento.
 
 - **TRANSFORM**
   - Lee los datos RAW desde MongoDB.
   - Selecciona las variables:
-      title
-      genre
-      platform
-      developer
-      release_date
-      short_description
-  - Objetivo: Generar un archivo CSV con 190 registros en data/transformed/juegos.csv. siguiendo las especificaciones anteriores
+      - `id`: entero del FreeToGame API
+      - `title`
+      - `genre`
+      - `platform`
+      - `developer`
+      - `release_date`
+      - `short_description`
+  - Objetivo: Generar un archivo CSV con el número de registros deseado en `data/transformed/juegos.csv` siguiendo las especificaciones anteriores
 
 - **LOAD**
   - Crea la tabla juegos en MySQL si no existe.
@@ -135,8 +136,8 @@ SELECT COUNT(*) FROM JUEGOS;
   jupyter notebook EDA/analisis.ipynb
   ```
   
-- **Salida**: los gráficos se muestran inline en el notebook. Si necesitas archivos, puedes usar `plt.savefig(...)` en las celdas.
-- **Notas**: asegúrate de tener `.env` con `MONGO_URI`, `MONGO_DB`, `MONGO_RAW_COLLECTION`.
+- **Salida**: Los gráficos se muestran inline en el notebook. Si necesitas archivos, puedes usar `plt.savefig(...)` en las celdas.
+- **Notas**: Asegúrate de tener `.env` con `MONGO_URI`, `MONGO_DB`, `MONGO_RAW_COLLECTION`.
 - Comentarios y logs en inglés para buenas prácticas.
 - Cada etapa está aislada en su propia carpeta y módulo.
 
